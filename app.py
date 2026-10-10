@@ -214,10 +214,10 @@ refresh(force=True)
 HOME = [("Home", "/")]
 
 
-@app.route("/google4993d0d2372232d2.html")
+@app.route("/googlee36b107012479386.html")
 def google_site_verification():
     return Response(
-        "google-site-verification: google4993d0d2372232d2.html",
+        "google-site-verification: googlee36b107012479386.html",
         mimetype="text/html"
     )
 
