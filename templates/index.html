@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block content %}
+<h1>RRB ALP CBT-1 previous papers and topic-wise practice</h1>
+<p>Practise with {{ npq }} questions from {{ npap }} RRB ALP CBT-1 shifts ({{ span }}). Each question has its answer, a topic label and a note on whether similar questions repeated across shifts.</p>
+<p><a class="btn" href="/papers">Browse the {{ npap }} papers</a> <a class="btn ghost" href="/important">Important &amp; repeated topics</a> <a class="btn ghost" href="/practice">Practice by topic</a></p>
+<h2>Study by subject</h2><div class="grid">{% for s in subjects %}{% set p = per.get(s.id) %}
+<a class="card" href="/subject/{{ s.id }}"><strong>{{ s.name }}</strong><span class="muted">{{ nsub[s.id] }} paper questions{% if p %} · {{ (100*p[0]/p[1])|round|int }}% correct ({{ p[1] }} tried){% endif %}</span></a>{% endfor %}</div>
+<h2>Topics with the most questions</h2><ul>{% for t, n in top %}<li><a href="/topic/{{ t.id }}">{{ t.name }}</a> – {{ n }} questions in the papers</li>{% endfor %}</ul>
+<h2>Your progress</h2>
+<div class="grid stats"><div class="card"><b>{{ stats.total }}</b>questions attempted</div><div class="card"><b>{{ stats.acc }}%</b>accuracy</div>
+<a class="card" href="/wrong" rel="nofollow"><b>{{ stats.wrong }}</b>to retry</a></div>
+<h3>Recent sessions</h3>{% if recent %}<table>{% for r in recent %}<tr><td>{{ r.label }}</td><td>{{ r.score }}/{{ r.total }}</td><td class="muted">{{ r.ts }}</td></tr>{% endfor %}</table>
+{% else %}<p class="muted">No sessions yet. <a href="/practice">Start a practice quiz.</a></p>{% endif %}{% endblock %}

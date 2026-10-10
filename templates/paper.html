@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block content %}<h1>RRB ALP CBT-1 question paper – {{ p.long }}, Shift {{ p.shift[-1] }}</h1>
+<p>All {{ qs|length }} questions from the RRB ALP CBT-1 shift held on {{ p.long }} {% if p.time %}({{ p.time }}) {% endif %}, with the answer for each.{% if p.verified %} Language: Hindi. The paper prints 1 mark for a correct answer and ⅓ negative mark for a wrong one.{% endif %}</p>
+<p><a class="btn" href="/quiz?paper={{ p.id }}">Attempt this paper as a quiz</a></p>
+<h2>What this paper covered</h2><ul>{% for s in subjects %}{% if sc[s.id] %}<li><a href="/subject/{{ s.id }}">{{ s.name }}</a>: {{ sc[s.id] }} questions</li>{% endif %}{% endfor %}</ul>
+<h3>Topics in this paper</h3><ul class="cols">{% for t, n in tc %}<li><a href="/topic/{{ t }}">{{ T[t].name }}</a> ({{ n }})</li>{% endfor %}</ul>
+<h2>All {{ qs|length }} questions with answers</h2>
+{% for q in qs %}<article class="card" id="q{{ q.qno }}"><h3>Question {{ q.qno }} <a class="badge" href="/topic/{{ q.topic }}">{{ T[q.topic].name }}</a>{% if q.tag != 'normal' %} <span class="badge {{ q.tag }}">{{ q.tag.replace('_',' ') }}</span>{% endif %}</h3>
+{% if q.img %}{% set d = isize(q) %}<img class="qimg" src="{{ url_for('static', filename=q.img) }}" alt="Question {{ q.qno }} of the RRB ALP CBT-1 paper, {{ p.long }} Shift {{ p.shift[-1] }} ({{ T[q.topic].name }}): question with options A to D" {% if d[0] %}width="{{ d[0] }}" height="{{ d[1] }}"{% endif %} loading="lazy" decoding="async">
+{% else %}<p lang="hi">{{ q.q }}</p><ol type="A" class="opts" lang="hi">{% for o in q.o %}<li>{{ o }}</li>{% endfor %}</ol>{% endif %}
+<details><summary>Show answer</summary><p>Answer: {{ q.correct_answer }}</p></details></article>{% endfor %}
+<nav class="pager" aria-label="Other papers">{% if prev %}<a href="/papers/{{ prev.slug }}">← {{ prev.short }}, Shift {{ prev.shift[-1] }}</a>{% endif %} <a href="/papers">All papers</a> {% if nxt %}<a href="/papers/{{ nxt.slug }}">{{ nxt.short }}, Shift {{ nxt.shift[-1] }} →</a>{% endif %}</nav>{% endblock %}

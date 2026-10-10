@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block content %}<h1>{{ s.name }} for RRB ALP CBT-1</h1>
+<p>{{ n }} of the {{ npq }} questions in the papers ({{ span }}) fall under {{ s.name }}. Topics below are ordered by how many questions they had.</p>
+{% if s.id == 'gk' %}<p>This is a small share of these papers: mostly polity and current-affairs items, so treat it as secondary to the other subjects.</p>{% endif %}
+<div class="grid">{% for t in topics %}<div class="card"><h2><a href="/topic/{{ t.id }}">{{ t.name }}</a></h2><span class="muted">{{ PN[t.id] }} paper questions</span><p class="muted">{{ t.concept }}</p>
+<span class="row"><a class="btn ghost" href="/topic/{{ t.id }}">Study</a><a class="btn" href="/practice/{{ t.id }}">Practice</a></span></div>{% endfor %}</div>
+<p><a href="/important">See which {{ s.name }} patterns repeated</a> · <a href="/papers">Browse all papers</a></p>{% endblock %}

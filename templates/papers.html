@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block content %}<h1>RRB ALP CBT-1 question papers, {{ span }}</h1>
+<p>{{ npap }} shifts of the RRB ALP CBT-1. Open a shift to read every question with its answer, or attempt it as a quiz.{% if papers|selectattr('verified')|list %} The February 2026 papers (CEN 01/2025, Hindi) print 1 mark for a correct answer and ⅓ negative mark for a wrong one.{% endif %}</p>
+<div class="grid">{% for p in papers %}<a class="card" href="/papers/{{ p.slug }}"><h2>{{ p.long }} – Shift {{ p.shift[-1] }}</h2><span class="muted">{% if p.time %}{{ p.time }} · {% endif %}{{ p.count }} questions</span></a>{% endfor %}</div>
+<p><a href="/important">Which topics repeated across these papers?</a> · <a href="/practice">Practice by topic</a></p>{% endblock %}

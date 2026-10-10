@@ -1,0 +1,5 @@
+{% extends "admin/layout.html" %}{% block body %}<h1>Question manager</h1>
+<div class="grid stats"><div class="card"><b>{{ total }}</b>total questions</div><div class="card"><b>{{ types.get('previous_paper', 0) }}</b>previous paper</div><div class="card"><b>{{ types.get('practice', 0) }}</b>practice</div><div class="card"><b>{{ types.get('important', 0) }}</b>important</div></div>
+<h2>By subject</h2><table>{% for s in subjects %}<tr><td><a href="/admin/questions?subject={{ s.id }}">{{ s.name }}</a></td><td>{{ subj.get(s.id, 0) }}</td></tr>{% endfor %}</table>
+<h2>By topic</h2><table>{% for s in subjects %}{% for t in T.values() if t.subject == s.id and top.get(t.id) %}<tr><td class="muted">{{ s.name.split(' /')[0] }}</td><td><a href="/admin/questions?topic={{ t.id }}">{{ t.name }}</a></td><td>{{ top[t.id] }}</td></tr>{% endfor %}{% endfor %}</table>
+<h2>Recent questions</h2><table>{% for q in recent %}<tr><td><a href="/admin/questions/{{ q.id }}">{{ q.id }}</a></td><td>{{ (q.q or '(image question)')[:70] }}</td><td class="muted">{{ T[q.topic].name }}</td><td class="muted">{{ q.qtype }}</td></tr>{% endfor %}</table>{% endblock %}

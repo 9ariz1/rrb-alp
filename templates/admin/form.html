@@ -1,0 +1,18 @@
+{% extends "admin/layout.html" %}{% block body %}<h1>{{ title }}{% if ex %} <span class="muted">{{ ex.id }}</span>{% endif %}</h1>
+{% if errs %}<div class="err" role="alert"><strong>Please fix:</strong><ul>{% for e in errs %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+<form method="post" enctype="multipart/form-data" class="card form wide" id="qform" data-topics='{{ tmap|tojson }}'><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+<label>Subject<select name="subject" id="subject" required><option value="">Choose…</option>{% for s in subjects %}<option value="{{ s.id }}" {{ 'selected' if f.subject == s.id }}>{{ s.name }}</option>{% endfor %}</select></label>
+<label>Topic<select name="topic" id="topic" required data-current="{{ f.topic or '' }}"><option value="">Choose…</option>{% for s in subjects %}{% for t in T.values() if t.subject == s.id %}<option value="{{ t.id }}" data-subject="{{ s.id }}" {{ 'selected' if f.topic == t.id }}>{{ t.name }}</option>{% endfor %}{% endfor %}</select></label>
+<label>Subtopic (optional)<input name="subtopic" maxlength="120" value="{{ f.subtopic or '' }}"></label>
+<label>Question<textarea name="question" rows="4" maxlength="2000" lang="hi">{{ f.question or '' }}</textarea></label>
+<div class="opts4">{% for k in ['a','b','c','d'] %}<label>Option {{ k|upper }}<input name="opt_{{ k }}" maxlength="500" value="{{ f['opt_' ~ k] or '' }}" lang="hi"></label>{% endfor %}</div>
+<fieldset><legend>Correct answer</legend>{% for k in 'ABCD' %}<label class="inl"><input type="radio" name="answer" value="{{ k }}" {{ 'checked' if f.answer == k }} required> {{ k }}</label>{% endfor %}</fieldset>
+<label>Explanation (optional)<textarea name="explanation" rows="3" maxlength="2000" lang="hi">{{ f.explanation or '' }}</textarea></label>
+<div class="opts4"><label>Difficulty<select name="difficulty">{% for d in diffs %}<option {{ 'selected' if f.difficulty == d }}>{{ d }}</option>{% endfor %}</select></label>
+<label>Type<select name="qtype" id="qtype">{% for d in qtypes %}<option {{ 'selected' if f.qtype == d }}>{{ d }}</option>{% endfor %}</select></label></div>
+<fieldset id="paperbox"><legend>Previous paper details</legend><div class="opts4"><label>Paper date<input type="date" name="paper_date" value="{{ f.paper_date or '' }}"></label><label>Shift (1-9)<input name="shift" inputmode="numeric" maxlength="8" value="{{ f.shift or '' }}"></label>
+<label>Question number<input name="qno" inputmode="numeric" maxlength="3" value="{{ f.qno or '' }}"></label><label>Source (optional)<input name="source" maxlength="200" value="{{ f.source or '' }}"></label></div></fieldset>
+<label>Image (optional, PNG/JPEG/WebP, max 1 MB)<input type="file" name="image" accept="image/png,image/jpeg,image/webp"></label>
+{% if ex and ex.img %}<p><img class="qimg" src="{{ url_for('static', filename=ex.img) }}" alt="Current question image" loading="lazy" style="max-height:160px;width:auto"> <label class="inl"><input type="checkbox" name="remove_img"> Remove image</label></p>{% endif %}
+<p><button class="btn">Save question</button> <a href="/admin/questions">Cancel</a></p></form>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>{% endblock %}

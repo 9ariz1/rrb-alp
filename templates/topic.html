@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% from "_q.html" import qview with context %}{% block content %}<h1>{{ t.name }} – RRB ALP CBT-1</h1>
+<p>{{ t.concept }}</p>{% if t.formulas %}<h2>Formulas &amp; rules</h2><ul>{% for f in t.formulas %}<li>{{ f }}</li>{% endfor %}</ul>{% endif %}
+{% if t.examples %}<h2>Examples</h2><ul>{% for e in t.examples %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+<h2>Previous-paper questions ({{ npq }})</h2>{% if pq %}{% for q in pq %}{{ qview(q, True) }}{% endfor %}
+{% if npq > pq|length %}<p>Showing {{ pq|length }} of {{ npq }}. The rest are in the paper pages below.</p>{% endif %}
+<h3>Where this topic appeared</h3><ul>{% for p, n in where %}<li><a href="/papers/{{ p.slug }}">{{ p.short }}, Shift {{ p.shift[-1] }}</a> – {{ n }} question{{ 's' if n > 1 }}</li>{% endfor %}</ul>
+{% else %}<p class="muted">No previous-paper questions for this topic.</p>{% endif %}
+<p><a class="btn" href="/practice/{{ t.id }}">Practice {{ t.name }}</a></p>
+{% if related %}<h2>Related {{ s.name }} topics</h2><ul>{% for r in related %}<li><a href="/topic/{{ r.id }}">{{ r.name }}</a></li>{% endfor %}</ul>{% endif %}
+<p><a href="/subject/{{ s.id }}">All {{ s.name }} topics</a> · <a href="/important">Important topics</a></p>{% endblock %}

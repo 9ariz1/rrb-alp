@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ seo.title }}</title><meta name="description" content="{{ seo.desc }}">
+<meta name="robots" content="{{ 'noindex,follow' if seo.noindex else 'index,follow,max-image-preview:large' }}">
+{% if not seo.noindex %}<link rel="canonical" href="{{ seo.url }}">
+<meta property="og:title" content="{{ seo.title }}"><meta property="og:description" content="{{ seo.desc }}"><meta property="og:type" content="{{ seo.og }}">
+<meta property="og:url" content="{{ seo.url }}"><meta property="og:site_name" content="{{ seo.site }}"><meta property="og:locale" content="en_IN">
+<meta property="og:image" content="{{ seo.image }}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="RRB ALP CBT-1 previous papers and topic-wise practice">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title }}"><meta name="twitter:description" content="{{ seo.desc }}"><meta name="twitter:image" content="{{ seo.image }}">{% endif %}
+<meta name="theme-color" content="#16213a"><link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% for x in seo.ld %}<script type="application/ld+json">{{ x|tojson }}</script>
+{% endfor %}</head>
+<body><a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/">RRB ALP · CBT-1</a><nav aria-label="Main">
+<a href="/"{% if request.path == '/' %} aria-current="page"{% endif %}>Home</a>{% for s in subjects %}<a href="/subject/{{ s.id }}"{% if request.path == '/subject/' ~ s.id %} aria-current="page"{% endif %}>{{ s.name.split(' /')[0] }}</a>{% endfor %}
+<a href="/practice">Practice</a><a href="/papers">Papers</a><a href="/important">Important</a><a href="/wrong" rel="nofollow">Wrong</a></nav></header>
+<main id="content">
+{% if seo.crumbs and seo.crumbs|length > 1 %}<nav aria-label="Breadcrumb" class="crumbs"><ol>{% for n, p in seo.crumbs %}<li>{% if loop.last %}<span aria-current="page">{{ n }}</span>{% else %}<a href="{{ p }}">{{ n }}</a>{% endif %}</li>{% endfor %}</ol></nav>{% endif %}
+{% block content %}{% endblock %}</main>
+<footer><nav aria-label="Papers"><strong>Question papers</strong> {% for p in plist %}<a href="/papers/{{ p.slug }}">{{ p.short }} S{{ p.shift[-1] }}</a> {% endfor %}</nav>
+<nav aria-label="Study"><strong>Study</strong> {% for s in subjects %}<a href="/subject/{{ s.id }}">{{ s.name.split(' /')[0] }}</a> {% endfor %}<a href="/practice">Practice quizzes</a> <a href="/important">Important topics</a></nav>
+<p class="muted">Independent study resource, not affiliated with or endorsed by the Railway Recruitment Boards or Indian Railways. Previous-paper questions come from the RRB ALP CBT-1 question papers listed on the Papers page; answers follow the keys shown in those papers.</p></footer>
+{% block scripts %}{% endblock %}</body></html>

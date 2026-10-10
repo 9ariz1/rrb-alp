@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}<h1>RRB ALP CBT-1 practice MCQs by topic</h1>
+<p>Pick a topic for a 10 or 20 question quiz with instant score. Quizzes use real previous-paper questions, plus original practice questions.</p>
+{% for sb, ts in groups %}{% if ts %}<h2><a href="/subject/{{ sb.id }}">{{ sb.name }}</a></h2><ul class="cols">{% for t in ts %}<li><a href="/practice/{{ t.id }}">{{ t.name }}</a> <span class="muted">({{ PN[t.id] }})</span></li>{% endfor %}</ul>{% endif %}{% endfor %}
+<h2>Quick quiz</h2>
+<form action="/quiz" class="card form"><label>Topic<select name="topic">{% for s in subjects %}<optgroup label="{{ s.name }}">{% for t in topics if t.subject == s.id %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</optgroup>{% endfor %}</select></label>
+<label>Questions<select name="n"><option>10</option><option>20</option></select></label>
+<label>From<select name="src"><option value="">Papers + practice</option><option value="papers">Previous papers only</option></select></label><button class="btn">Start</button></form>{% endblock %}

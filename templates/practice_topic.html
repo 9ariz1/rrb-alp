@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block content %}<h1>{{ t.name }} practice quiz – RRB ALP CBT-1</h1>
+<p>{{ n }} questions available for {{ t.name }}{% if npq %}, {{ npq }} of them from the February 2026 papers{% endif %}. Answer, submit and see your score with the correct options marked. Wrong answers are saved for retry.</p>
+<p role="group" aria-label="Quiz size"><button class="btn active" data-load="topic={{ t.id }}&n=10">10 questions</button> <button class="btn ghost" data-load="topic={{ t.id }}&n=20">20 questions</button>{% if npq %} <button class="btn ghost" data-load="topic={{ t.id }}&n=20&src=papers">Previous papers only</button>{% endif %}</p>
+<div id="quiz" data-qs="topic={{ t.id }}&n=10" data-label="{{ t.name }}"><noscript>JavaScript is needed for the interactive quiz. You can still <a href="/topic/{{ t.id }}">read the {{ t.name }} questions</a>.</noscript></div>
+<p><a href="/topic/{{ t.id }}">Study notes and past questions for {{ t.name }}</a> · <a href="/subject/{{ s.id }}">{{ s.name }}</a> · <a href="/practice">All practice quizzes</a></p>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/script.js') }}" defer></script>{% endblock %}

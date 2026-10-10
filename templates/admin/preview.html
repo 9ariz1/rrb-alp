@@ -1,0 +1,6 @@
+{% extends "admin/layout.html" %}{% from "_q.html" import qview with context %}{% block body %}<h1>Preview <span class="muted">{{ q.id }}</span></h1>
+<p><a class="btn" href="/admin/questions/{{ q.id }}/edit">Edit</a> <a class="btn ghost" href="/admin/questions">Back to list</a></p>
+{{ qview(q, True) }}
+<table><tr><th>Subject</th><td>{{ subjects|selectattr('id','equalto',q.subject)|map(attribute='name')|first }}</td></tr><tr><th>Topic</th><td><a href="/topic/{{ q.topic }}">{{ T[q.topic].name }}</a> · <a href="/practice/{{ q.topic }}">practice page</a></td></tr>
+<tr><th>Subtopic</th><td>{{ q.subtopic or '–' }}</td></tr><tr><th>Type / difficulty</th><td>{{ q.qtype }} / {{ q.difficulty }}</td></tr><tr><th>Correct answer</th><td>{{ q.correct_answer }}</td></tr><tr><th>Explanation</th><td lang="hi">{{ q.e or '–' }}</td></tr>
+{% if q.paper %}<tr><th>Paper</th><td><a href="/papers/{{ plist|selectattr("id","equalto",q.paper)|map(attribute="slug")|first }}">{{ q.paper_date }} {{ q.shift }} · Q{{ q.qno }}</a></td></tr>{% endif %}<tr><th>Source</th><td>{{ q.source or '–' }}</td></tr></table>{% endblock %}

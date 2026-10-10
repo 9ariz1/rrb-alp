@@ -1,0 +1,7 @@
+{% macro qview(q, answer=False) %}
+<div class="card" lang="hi">
+  {% if q.img %}{% set d = isize(q) %}<img class="qimg" src="{{ url_for('static', filename=q.img) }}" alt="RRB ALP CBT-1 question {{ q.qno }}, {{ q.paper_date }} {{ q.shift }} ({{ T[q.topic].name }})"{% if d[0] %} width="{{ d[0] }}" height="{{ d[1] }}"{% endif %} loading="lazy" decoding="async">
+  {% else %}<p>{{ q.q }}</p><ol type="A" class="opts">{% for o in q.o %}<li>{{ o }}</li>{% endfor %}</ol>{% endif %}
+  <span class="muted" lang="en">{{ src(q) }}{% if q.tag and q.tag != 'normal' %} <span class="badge {{ q.tag }}">{{ q.tag.replace('_',' ') }}</span>{% endif %}{% if answer %} · Answer: {{ 'ABCD'[q.a] }}{% endif %}</span>
+</div>
+{% endmacro %}

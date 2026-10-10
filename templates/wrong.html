@@ -1,0 +1,3 @@
+{% extends "base.html" %}{% from "_q.html" import qview with context %}{% block content %}<h1>Wrong questions</h1>
+{% if qs %}<p><a class="btn" href="/quiz?mode=wrong">Retry all ({{ qs|length }})</a></p>{% for q in qs %}{{ qview(q) }}{% endfor %}
+{% else %}<p class="muted">Nothing to retry. Wrong answers from practice will collect here.</p>{% endif %}{% endblock %}

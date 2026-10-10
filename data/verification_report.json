@@ -1,0 +1,188 @@
+{
+ "scope": "Verification of existing extraction output (/home/claude/w/raw.json + static/img/q/*.webp) against the 10 original PDFs. Flask app, templates, questions.json and database were not modified; questions.json still holds only the 30 Phase 1 practice questions.",
+ "source_of_truth": "original PDFs in /mnt/user-data/uploads",
+ "total": 750,
+ "verified": 727,
+ "needs_review": 19,
+ "missing": 0,
+ "duplicate": 0,
+ "answer_uncertain": 0,
+ "image_crop_issue": 4,
+ "needs_review_ids": [
+  "p20260213s1q25",
+  "p20260213s1q46",
+  "p20260213s1q53",
+  "p20260216s1q21",
+  "p20260216s1q35",
+  "p20260216s2q39",
+  "p20260216s2q75",
+  "p20260216s3q30",
+  "p20260216s3q49",
+  "p20260216s3q52",
+  "p20260216s3q62",
+  "p20260217s3q45",
+  "p20260217s3q60",
+  "p20260218s1q07",
+  "p20260218s1q21",
+  "p20260218s1q40",
+  "p20260218s2q02",
+  "p20260218s3q04",
+  "p20260218s3q09"
+ ],
+ "image_crop_issue_ids": [
+  "p20260213s1q75",
+  "p20260217s1q75",
+  "p20260217s2q75",
+  "p20260218s2q75"
+ ],
+ "answer_uncertain_ids": [],
+ "duplicate_ids": [],
+ "missing_ids": [],
+ "reasons": {
+  "needs_review": "question text field ends with a stray 'Ans' label copied from the PDF (options are in images / not parsed); the crop image and answer are unaffected. Text must be cleaned before use.",
+  "image_crop_issue": "cosmetic only: last-on-page question; crop includes 370-480pt of blank space below the content (watermark counted in crop height). Content, alignment and icon removal are fine."
+ },
+ "per_paper": [
+  {
+   "id": "20260213s1",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-13-02-2026-S1.pdf",
+   "header_date": "13/02/2026",
+   "header_time": "9:00 AM - 10:00 AM",
+   "shift": "Shift 1",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260216s1",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-16-02-2026-S1.pdf",
+   "header_date": "16/02/2026",
+   "header_time": "9:00 AM - 10:00 AM",
+   "shift": "Shift 1",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260216s2",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-16-02-2026-S2.pdf",
+   "header_date": "16/02/2026",
+   "header_time": "12:30 PM - 1:30 PM",
+   "shift": "Shift 2",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260216s3",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-16-02-2026-S3.pdf",
+   "header_date": "16/02/2026",
+   "header_time": "4:00 PM - 5:00 PM",
+   "shift": "Shift 3",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260217s1",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-17-02-2026-S1.pdf",
+   "header_date": "17/02/2026",
+   "header_time": "9:00 AM - 10:00 AM",
+   "shift": "Shift 1",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260217s2",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-17-02-2026-S2.pdf",
+   "header_date": "17/02/2026",
+   "header_time": "12:30 PM - 1:30 PM",
+   "shift": "Shift 2",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260217s3",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-17-02-2026-S3.pdf",
+   "header_date": "17/02/2026",
+   "header_time": "4:00 PM - 5:00 PM",
+   "shift": "Shift 3",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260218s1",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-18-02-2026-S1.pdf",
+   "header_date": "18/02/2026",
+   "header_time": "9:00 AM - 10:00 AM",
+   "shift": "Shift 1",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260218s2",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-18-02-2026-S2.pdf",
+   "header_date": "18/02/2026",
+   "header_time": "12:30 PM - 1:30 PM",
+   "shift": "Shift 2",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  },
+  {
+   "id": "20260218s3",
+   "file": "RRB_ALP_CBT_01-Questions-Paper-Hindi-_-18-02-2026-S3.pdf",
+   "header_date": "18/02/2026",
+   "header_time": "4:00 PM - 5:00 PM",
+   "shift": "Shift 3",
+   "header_matches_filename": true,
+   "pdf_q_markers": 75,
+   "pdf_numbering_1_to_75": true,
+   "extracted": 75,
+   "numbering_ok": true
+  }
+ ],
+ "checks": {
+  "numbering": "All 10 papers: pdftotext shows Q.1-Q.75 contiguous (75 markers each); extracted ids Q1-Q75 match, no gaps, no duplicate ids.",
+  "date_shift": "Test Date/Test Time read from each PDF header match the filename date and S1/S2/S3 and the stored values for all 10 papers (S1 9:00-10:00 AM, S2 12:30-1:30 PM, S3 4:00-5:00 PM).",
+  "correct_answer": "All 750 blocks have exactly 1 green tick icon and 3 red crosses; the tick position was cross-checked with an independent signal (colour of the A-D option labels in the PDF text layer: 750 green, 2250 red). 0 disagreements. Answers are exactly as printed in the PDFs; no external key used and none guessed.",
+  "options": "All 750 blocks contain labels A, B, C, D exactly once. 631 questions have text for all 4 options; the 119 image-crop questions have options partly/fully in images (fractions, figures, tables, formulas) shown in the crop.",
+  "text_completeness": "Every number in the PDF block appears in the extracted text (0 mismatches on non-image questions); no corrupt/NUL/replacement characters; no page furniture leaked. 741 questions have glyphs without a Unicode mapping in the PDF layer (5522 total); pdftotext reconstructs them (devanagari codepoints in extracted text >= plumber chars + unmapped glyphs for every question). Not verifiable at glyph level without Hindi OCR.",
+  "duplicates": "0 identical questions within the same paper; 0 exact (text+options) repeats across papers.",
+  "image_crops": "119 crops, 119 files, no orphans. All: size/blank checks, coverage of content bottom/right, icon-removal test against the original page render (0 real leaks), colour removed (greyscale, answer colour not visible). About 15 distinct crops were also inspected visually (the rest by the programmatic checks above); all inspected crops were aligned and clean. OCR numeric match on 47 crops with numbers: mean 86%; 4 low scores were tables (digits read poorly), visually fine."
+ },
+ "heuristics_dismissed_as_false_positives": [
+  "'dark pixels in icon strip' (119): the strip also contains the first letters of the stem text",
+  "'ink touches crop edge' (44): box-border line segments",
+  "'leftover blob' (87): dense Devanagari headline strokes",
+  "'ink above first line' (20): tall formula images and 164/93 px border segments",
+  "'leak' 1 (p20260216s3q62): coloured fraction image, visually clean"
+ ],
+ "notes": [
+  "0 stems show pdftotext word-splitting artefacts (stray space before a vowel sign/anusvara, e.g. 'सेकं ड'); other splits (e.g. 'आरे ख') cannot be counted automatically. Wording is otherwise as in the PDF; the crop is the exact-wording source for the 119 image questions.",
+  "Exact visual wording for the other 631 questions is only available as text; consider showing images for all if exact spacing matters.",
+  "Question 'correct' status follows the answer keys printed in the PDFs (green tick)."
+ ]
+}

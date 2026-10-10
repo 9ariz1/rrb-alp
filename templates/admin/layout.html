@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block content %}
+{% if session.admin %}<nav class="adminnav" aria-label="Admin"><a href="/admin">Dashboard</a> <a href="/admin/questions">Questions</a> <a class="btn" href="/admin/questions/new">Add question</a>
+<form method="post" action="/admin/logout" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn ghost">Log out ({{ session.admin }})</button></form></nav>{% endif %}
+{% for cat, m in get_flashed_messages(with_categories=true) %}<p class="flash {{ cat }}" role="status">{{ m }}</p>{% endfor %}
+{% block body %}{% endblock %}{% endblock %}
