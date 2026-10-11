@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "RRB ALP CBT-1 Practice",
+  "short_name": "RRB ALP",
+  "description": "Practice RRB ALP CBT-1 questions, previous papers, topic-wise MCQs and important topics.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#2b63e3",
+  "icons": [
+    {
+      "src": "/static/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

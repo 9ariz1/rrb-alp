@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Student Registration</h2>
+
+    <form method="POST" action="{{ url_for('student_register') }}">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+
+        <label>Full Name</label>
+        <input type="text" name="name" maxlength="100" required>
+
+        <label>Email</label>
+        <input type="email" name="email" maxlength="254" required>
+
+        <label>Phone</label>
+        <input type="tel" name="phone" maxlength="20" required>
+
+        <label>Password</label>
+        <input type="password" name="password" minlength="8" required>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already registered?
+        <a href="{{ url_for('student_login') }}">Login</a>
+    </p>
+</div>
+{% endblock %}

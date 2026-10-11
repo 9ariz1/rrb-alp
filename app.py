@@ -1,9 +1,12 @@
 import hmac, json, os, random, re, secrets, sqlite3, threading, time
+import hashlib
+import smtplib
+from email.message import EmailMessage
 from dotenv import load_dotenv
 load_dotenv()
 from collections import Counter, defaultdict
 from contextlib import contextmanager
-from datetime import datetime, date
+from datetime import datetime, date,timezone,timedelta
 from pathlib import Path
 import click
 from functools import wraps
@@ -63,6 +66,27 @@ CREATE TABLE IF NOT EXISTS questions(
 CREATE UNIQUE INDEX IF NOT EXISTS uq_paper_q ON questions(paper_id, qno) WHERE paper_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_q_topic ON questions(topic);
 CREATE TABLE IF NOT EXISTS admins(username TEXT PRIMARY KEY, pw_hash TEXT NOT NULL, created_at TEXT);
+
+CREATE TABLE IF NOT EXISTS students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL COLLATE NOCASE UNIQUE,
+    phone TEXT NOT NULL,
+    pw_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    last_login TEXT
+);
+
+CREATE TABLE IF NOT EXISTS password_resets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at TEXT NOT NULL,
+    used_at TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(student_id) REFERENCES students(id)
+);
+
 """
 
 def import_json(path, c):
@@ -186,27 +210,90 @@ def csrf_token():
     if "csrf" not in session: session["csrf"] = secrets.token_urlsafe(24)
     return session["csrf"]
 
+
+def send_reset_email(to_email, reset_url):
+    username = os.environ.get("MAIL_USERNAME", "").strip()
+    password = os.environ.get("MAIL_APP_PASSWORD", "").replace(" ", "")
+
+    if not username or not password:
+        raise RuntimeError("Gmail SMTP settings are missing.")
+
+    msg = EmailMessage()
+    msg["Subject"] = "Reset your RRB ALP password"
+    msg["From"] = username
+    msg["To"] = to_email
+    msg.set_content(
+        "We received a password reset request for your RRB ALP account.\n\n"
+        f"Open this link within 15 minutes:\n{reset_url}\n\n"
+        "If you did not request this, ignore this email."
+    )
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as smtp:
+        smtp.login(username, password)
+        smtp.send_message(msg)
+
+
 @app.before_request
 def clean_urls():
     p = request.path
-    if p.startswith("/static"): return
+
+    if p.startswith("/static"):
+        return
+
     refresh()
+
+    public_paths = {
+        "/login",
+        "/register",
+        "/robots.txt",
+        "/sitemap.xml",
+        "/googlee36b107012479386.html",
+        "/forgot-password",
+        "/reset-password",
+    }
+
+    # Admin pages use their own admin authentication.
+    if p.startswith("/admin"):
+        pass
+    elif p not in public_paths and not session.get("student_id"):
+        if p.startswith("/api/"):
+            return jsonify({"error": "Login required"}), 401
+        return redirect(url_for("student_login"))
+
     if request.method == "GET" and len(p) > 1 and p.endswith("/"):
         qs = request.query_string.decode()
-        return redirect(p.rstrip("/") + ("?" + qs if qs else ""), 301)
-    if request.method == "GET" and request.args and not p.startswith(NOINDEX_PATHS):
+        return redirect(
+            p.rstrip("/") + ("?" + qs if qs else ""), 301
+        )
+
+    if request.method == "GET" and request.args and p != "/reset-password"and not p.startswith(NOINDEX_PATHS):
         return redirect(p, 301)
-    if request.method == "POST" and p.startswith("/admin"):
+
+    if request.method == "POST" and (
+        p.startswith("/admin") or p in ("/register", "/login","/forgot-password",
+        "/reset-password", "/logout")
+    ):
         tok = request.form.get("csrf", "")
-        if not tok or not hmac.compare_digest(tok, session.get("csrf", "")): abort(400)
+        if not tok or not hmac.compare_digest(
+            tok, session.get("csrf", "")
+        ):
+            abort(400)
+
 
 @app.after_request
 def headers(r):
     r.headers["X-Content-Type-Options"] = "nosniff"
-    if request.path.startswith(XROBOTS): r.headers["X-Robots-Tag"] = "noindex, follow"
+
+    if request.path.startswith(XROBOTS):
+        r.headers["X-Robots-Tag"] = "noindex, follow"
+
     if request.path.startswith("/admin"):
-        r.headers["Cache-Control"] = "no-store"; r.headers["X-Frame-Options"] = "DENY"; r.headers["Referrer-Policy"] = "same-origin"
+        r.headers["Cache-Control"] = "no-store"
+        r.headers["X-Frame-Options"] = "DENY"
+        r.headers["Referrer-Policy"] = "same-origin"
+
     return r
+
 
 init_db()
 refresh(force=True)
@@ -221,6 +308,290 @@ def google_site_verification():
         mimetype="text/html"
     )
 
+
+@app.route("/register", methods=["GET", "POST"])
+def student_register():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        phone = request.form.get("phone", "").strip()
+        password = request.form.get("password", "")
+
+        if not all([name, email, phone, password]):
+            flash("Please fill in all fields.", "error")
+            return redirect(url_for("student_register"))
+
+        if len(password) < 8:
+            flash("Password must be at least 8 characters.", "error")
+            return redirect(url_for("student_register"))
+
+        if len(name) > 100 or len(email) > 254 or len(phone) > 20:
+            flash("Please check the length of your details.", "error")
+            return redirect(url_for("student_register"))
+
+        try:
+            with tx() as c:
+                c.execute(
+                    """
+                    INSERT INTO students
+                    (name, email, phone, pw_hash, created_at)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        name,
+                        email,
+                        phone,
+                        generate_password_hash(password),
+                        datetime.now(timezone.utc).isoformat(),
+                    ),
+                )
+
+            flash("Registration successful. Please log in.", "success")
+            return redirect(url_for("student_login"))
+
+        except sqlite3.IntegrityError:
+            flash("This email is already registered.", "error")
+            return redirect(url_for("student_register"))
+
+    desc = "Create an account to use RRB ALP CBT-1 practice questions."
+    return render_template(
+        "register.html",
+        seo=seo("Student Registration", desc, "/register", noindex=True)
+    )
+
+
+@app.route("/login", methods=["GET", "POST"])
+def student_login():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+
+        with db() as c:
+            student = c.execute(
+                """
+                SELECT id, name, pw_hash
+                FROM students
+                WHERE email = ? COLLATE NOCASE
+                """,
+                (email,),
+            ).fetchone()
+
+        if student and check_password_hash(student["pw_hash"], password):
+            session.clear()
+            session["student_id"] = student["id"]
+            session["student_name"] = student["name"]
+            session["csrf"] = secrets.token_urlsafe(24)
+            session.permanent = True
+
+            with tx() as c:
+                c.execute(
+                    "UPDATE students SET last_login = ? WHERE id = ?",
+                    (
+                        datetime.now(timezone.utc).isoformat(),
+                        student["id"],
+                    ),
+                )
+
+            flash("Login successful.", "success")
+            return redirect(url_for("index"))
+
+        flash("Invalid email or password.", "error")
+        return redirect(url_for("student_login"))
+
+    desc = "Log in to your RRB ALP CBT-1 practice account."
+    return render_template(
+        "login.html",
+        seo=seo("Student Login", desc, "/login", noindex=True)
+    )
+
+
+@app.route("/logout", methods=["POST"])
+def student_logout():
+    if not session.get("student_id"):
+        return redirect(url_for("student_login"))
+
+    tok = request.form.get("csrf", "")
+    if not tok or not hmac.compare_digest(
+        tok, session.get("csrf", "")
+    ):
+        abort(400)
+
+    session.clear()
+    return redirect(url_for("student_login"))
+
+
+
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+
+        if email and len(email) <= 254:
+            with db() as c:
+                student = c.execute(
+                    """
+                    SELECT id, email
+                    FROM students
+                    WHERE email = ? COLLATE NOCASE
+                    """,
+                    (email,),
+                ).fetchone()
+
+            # Only registered email addresses receive reset emails.
+            if student:
+                raw_token = secrets.token_urlsafe(32)
+                token_hash = hashlib.sha256(
+                    raw_token.encode()
+                ).hexdigest()
+
+                now = datetime.now(timezone.utc)
+                expires = (
+                    now + timedelta(minutes=15)
+                ).isoformat()
+
+                with tx() as c:
+                    # Invalidate previous unused reset links.
+                    c.execute(
+                        """
+                        UPDATE password_resets
+                        SET used_at = ?
+                        WHERE student_id = ?
+                          AND used_at IS NULL
+                        """,
+                        (now.isoformat(), student["id"]),
+                    )
+
+                    c.execute(
+                        """
+                        INSERT INTO password_resets
+                        (student_id, token_hash, expires_at,
+                         used_at, created_at)
+                        VALUES (?, ?, ?, NULL, ?)
+                        """,
+                        (
+                            student["id"],
+                            token_hash,
+                            expires,
+                            now.isoformat(),
+                        ),
+                    )
+
+                reset_url = url_for(
+                    "reset_password",
+                    token=raw_token,
+                    _external=True,
+                )
+
+                try:
+                    send_reset_email(
+                        student["email"],
+                        reset_url,
+                    )
+                    flash(
+                        "Password reset link sent to your email.",
+                        "success",
+                    )
+                except Exception:
+                    app.logger.exception(
+                        "Password reset email delivery failed"
+                    )
+                    flash(
+                        "Email could not be sent. Please try again later.",
+                        "error",
+                    )
+
+        return redirect(url_for("student_login"))
+
+    return render_template(
+        "forgot_password.html",
+        seo=seo(
+            "Forgot Password",
+            "Reset your RRB ALP account password.",
+            "/forgot-password",
+            noindex=True,
+        ),
+    )
+
+
+
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    token = request.args.get("token", "")
+    if not token or len(token) > 200:
+        flash("This reset link is invalid or expired.", "error")
+        return redirect(url_for("student_login"))
+
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    now_utc = datetime.now(timezone.utc)
+
+    with db() as c:
+        reset = c.execute(
+            """SELECT id, student_id, expires_at, used_at
+               FROM password_resets WHERE token_hash = ?""",
+            (token_hash,),
+        ).fetchone()
+
+    valid = False
+    if reset and not reset["used_at"]:
+        try:
+            expiry = datetime.fromisoformat(reset["expires_at"])
+            if expiry.tzinfo is None:
+                expiry = expiry.replace(tzinfo=timezone.utc)
+            now_utc = datetime.now(timezone.utc)
+            valid = now_utc < expiry
+        except (ValueError, TypeError):
+            valid = False
+
+    if not valid:
+        flash("This reset link is invalid or expired.", "error")
+        return redirect(url_for("student_login"))
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm_password", "")
+
+        if len(password) < 8:
+            flash("Password must be at least 8 characters.", "error")
+            return redirect(url_for("reset_password", token=token))
+
+        if password != confirm:
+            flash("Passwords do not match.", "error")
+            return redirect(url_for("reset_password", token=token))
+
+        # Re-check and consume the token atomically to prevent reuse.
+        with tx() as c:
+            current = c.execute(
+                """SELECT student_id FROM password_resets
+                   WHERE id = ? AND token_hash = ?
+                   AND used_at IS NULL AND expires_at > ?""",
+                (reset["id"], token_hash, now_utc.isoformat()),
+            ).fetchone()
+
+            if not current:
+                flash("This reset link is invalid or expired.", "error")
+                return redirect(url_for("student_login"))
+
+            c.execute(
+                "UPDATE students SET pw_hash = ? WHERE id = ?",
+                (generate_password_hash(password), current["student_id"]),
+            )
+            c.execute(
+                "UPDATE password_resets SET used_at = ? WHERE student_id = ? "
+                "AND used_at IS NULL",
+                (now_utc.isoformat(), current["student_id"]),
+            )
+
+        flash("Password reset successful. Please log in.", "success")
+        return redirect(url_for("student_login"))
+
+    return render_template(
+        "reset_password.html",
+        token=token,
+        seo=seo("Set New Password", "Choose a new account password.",
+                "/reset-password", noindex=True),
+    )
 
 @app.route("/")
 def index():

@@ -1,23 +1,142 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ seo.title }}</title><meta name="description" content="{{ seo.desc }}">
-<meta name="robots" content="{{ 'noindex,follow' if seo.noindex else 'index,follow,max-image-preview:large' }}">
-{% if not seo.noindex %}<link rel="canonical" href="{{ seo.url }}">
-<meta property="og:title" content="{{ seo.title }}"><meta property="og:description" content="{{ seo.desc }}"><meta property="og:type" content="{{ seo.og }}">
-<meta property="og:url" content="{{ seo.url }}"><meta property="og:site_name" content="{{ seo.site }}"><meta property="og:locale" content="en_IN">
-<meta property="og:image" content="{{ seo.image }}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="RRB ALP CBT-1 previous papers and topic-wise practice">
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title }}"><meta name="twitter:description" content="{{ seo.desc }}"><meta name="twitter:image" content="{{ seo.image }}">{% endif %}
-<meta name="theme-color" content="#16213a"><link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-{% for x in seo.ld %}<script type="application/ld+json">{{ x|tojson }}</script>
-{% endfor %}</head>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{ seo.title }}</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="description" content="{{ seo.desc }}">
+    <meta name="robots" content="{{ 'noindex,follow' if seo.noindex else 'index,follow,max-image-preview:large' }}">
+    {% if not seo.noindex %}
+    <link rel="canonical" href="{{ seo.url }}">
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.desc }}">
+    <meta property="og:type" content="{{ seo.og }}">
+    <meta property="og:url" content="{{ seo.url }}">
+    <meta property="og:site_name" content="{{ seo.site }}">
+    <meta property="og:locale" content="en_IN">
+    <meta property="og:image" content="{{ seo.image }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="RRB ALP CBT-1 previous papers and topic-wise practice">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.desc }}">
+    <meta name="twitter:image" content="{{ seo.image }}">{% endif %}
+    <meta name="theme-color" content="#2b63e3">
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% for x in seo.ld %}
+    <script type="application/ld+json">{{ x|tojson }}</script>
+    {% endfor %}
+</head>
+
 <body><a class="skip" href="#content">Skip to content</a>
-<header><a class="brand" href="/">RRB ALP · CBT-1</a><nav aria-label="Main">
-<a href="/"{% if request.path == '/' %} aria-current="page"{% endif %}>Home</a>{% for s in subjects %}<a href="/subject/{{ s.id }}"{% if request.path == '/subject/' ~ s.id %} aria-current="page"{% endif %}>{{ s.name.split(' /')[0] }}</a>{% endfor %}
-<a href="/practice">Practice</a><a href="/papers">Papers</a><a href="/important">Important</a><a href="/wrong" rel="nofollow">Wrong</a></nav></header>
-<main id="content">
-{% if seo.crumbs and seo.crumbs|length > 1 %}<nav aria-label="Breadcrumb" class="crumbs"><ol>{% for n, p in seo.crumbs %}<li>{% if loop.last %}<span aria-current="page">{{ n }}</span>{% else %}<a href="{{ p }}">{{ n }}</a>{% endif %}</li>{% endfor %}</ol></nav>{% endif %}
-{% block content %}{% endblock %}</main>
-<footer><nav aria-label="Papers"><strong>Question papers</strong> {% for p in plist %}<a href="/papers/{{ p.slug }}">{{ p.short }} S{{ p.shift[-1] }}</a> {% endfor %}</nav>
-<nav aria-label="Study"><strong>Study</strong> {% for s in subjects %}<a href="/subject/{{ s.id }}">{{ s.name.split(' /')[0] }}</a> {% endfor %}<a href="/practice">Practice quizzes</a> <a href="/important">Important topics</a></nav>
-<p class="muted">Independent study resource, not affiliated with or endorsed by the Railway Recruitment Boards or Indian Railways. Previous-paper questions come from the RRB ALP CBT-1 question papers listed on the Papers page; answers follow the keys shown in those papers.</p></footer>
-{% block scripts %}{% endblock %}</body></html>
+    <header><a class="brand" href="/">RRB ALP · CBT-1</a>
+        <nav aria-label="Main">
+            <a href="/" {% if request.path=='/' %} aria-current="page" {% endif %}>Home</a>{% for s in subjects %}<a
+                href="/subject/{{ s.id }}" {% if request.path=='/subject/' ~ s.id %} aria-current="page" {% endif %}>{{
+                s.name.split(' /')[0] }}</a>{% endfor %}
+            <a href="/practice">Practice</a><a href="/papers">Papers</a><a href="/important">Important</a><a
+                href="/wrong" rel="nofollow">Wrong</a>
+            {% if session.get('student_id') %}
+            <span>Hi, {{ session.get('student_name', 'Student') }}</span>
+            <form method="POST" action="{{ url_for('student_logout') }}" style="display:inline">
+                <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+                <button type="submit">Logout</button>
+            </form>
+            {% else %}
+            <a href="{{ url_for('student_login') }}">Login</a>
+            <a href="{{ url_for('student_register') }}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+    
+    <main id="content">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div id="toast-container" role="status" aria-live="polite">
+            {% for category, message in messages %}
+            <div class="auth-toast {{ category }}">
+                <span>{{ message }}</span>
+                <button type="button" onclick="this.parentElement.remove()" aria-label="Close">×</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <style>
+            #toast-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                width: min(350px, calc(100% - 40px));
+            }
+
+            .auth-toast {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+                padding: 15px 18px;
+                margin-bottom: 10px;
+                border-radius: 10px;
+                background: #fff;
+                color: #222;
+                box-shadow: 0 5px 24px #0002;
+                border-left: 5px solid #16803d;
+            }
+
+            .auth-toast.error {
+                border-left-color: #dc2626;
+            }
+
+            .auth-toast button {
+                border: 0;
+                background: transparent;
+                font-size: 22px;
+                cursor: pointer;
+            }
+        </style>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll(".auth-toast").forEach(toast => {
+                    setTimeout(() => toast.remove(), 4000);
+                });
+            });
+        </script>
+
+        {% if seo.crumbs and seo.crumbs|length > 1 %}<nav aria-label="Breadcrumb" class="crumbs">
+            <ol>{% for n, p in seo.crumbs %}<li>{% if loop.last %}<span aria-current="page">{{ n }}</span>{% else %}<a
+                        href="{{ p }}">{{ n }}</a>{% endif %}</li>{% endfor %}</ol>
+        </nav>{% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <nav aria-label="Papers"><strong>Question papers</strong> {% for p in plist %}<a href="/papers/{{ p.slug }}">{{
+                p.short }} S{{ p.shift[-1] }}</a> {% endfor %}</nav>
+        <nav aria-label="Study"><strong>Study</strong> {% for s in subjects %}<a href="/subject/{{ s.id }}">{{
+                s.name.split(' /')[0] }}</a> {% endfor %}<a href="/practice">Practice quizzes</a> <a
+                href="/important">Important topics</a></nav>
+        <p class="muted">Independent study resource, not affiliated with or endorsed by the Railway Recruitment Boards
+            or Indian Railways. Previous-paper questions come from the RRB ALP CBT-1 question papers listed on the
+            Papers page; answers follow the keys shown in those papers.</p>
+    </footer>
+    {% block scripts %}{% endblock %}
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("/static/sw.js")
+                    .catch((error) => console.error("Service worker registration failed:", error));
+            });
+        }
+    </script>
+
+</body>
+
+</html>
