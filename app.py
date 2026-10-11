@@ -443,13 +443,14 @@ def send_reset_email(to_email, reset_url):
             "If you did not request this, ignore this email."
         ),
     }
-
+    
     request = urllib.request.Request(
         "https://api.resend.com/emails",
         data=json.dumps(payload).encode("utf-8"),
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            "User-Agent": "RRB-ALP-App/1.0",
         },
         method="POST",
     )
