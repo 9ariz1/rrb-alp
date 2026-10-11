@@ -421,6 +421,49 @@ def student_logout():
 
 
 
+def send_reset_email(to_email, reset_url):
+    import urllib.request
+    import urllib.error
+
+    api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("RESEND_API_KEY is missing in environment.")
+
+    payload = {
+        "from": os.environ.get(
+            "RESEND_FROM_EMAIL",
+            "RRB ALP <onboarding@resend.dev>"
+        ),
+        "to": [to_email],
+        "subject": "Reset your RRB ALP password",
+        "text": (
+            "We received a password reset request.\n\n"
+            f"Reset your password using this link:\n{reset_url}\n\n"
+            "This link expires in 15 minutes. "
+            "If you did not request this, ignore this email."
+        ),
+    }
+
+    request = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            result = json.loads(response.read().decode("utf-8"))
+            if not result.get("id"):
+                raise RuntimeError("Resend did not return an email ID.")
+    except urllib.error.HTTPError as exc:
+        error = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Resend API error {exc.code}: {error}") from exc
+
+
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
